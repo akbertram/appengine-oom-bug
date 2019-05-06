@@ -34,7 +34,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
-@WebServlet(name = "CacheServlet", value = "/fetch")
+/**
+ * Fetch large chunks of data from Memcache.
+ */
+@WebServlet(name = "FetchServlet", value = "/fetch")
 public class FetchServlet extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(FetchServlet.class.getName());
@@ -53,30 +56,25 @@ public class FetchServlet extends HttpServlet {
     AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
 
     List<Future<Object>> results = new ArrayList<>();
-    for (int i = 0; i < 1000; i++) {
-      Future<Object> result = memcacheService.get(Integer.toString(count));
+
+    for (int i = 0; i < count; i++) {
+      Future<Object> result = memcacheService.get(Integer.toString(i));
       results.add(result);
     }
 
-    double total = 0;
-
-    for (Future<Object> future : results) {
-      List<MyBean> result;
+    // Ensure the results are used
+    int successCount = 0;
+    for (Future<Object> result : results) {
       try {
-        result = (List<MyBean>) future.get();
-      } catch (Exception e) {
-        throw new IOException(e);
+        result.get();
+        successCount++;
+      } catch (Exception ignored) {
       }
     }
 
-    List<MyBean> list = new ArrayList<>();
-    for (int i = 0; i < 100_000; i++) {
-      list.add(new MyBean());
-    }
 
     LOGGER.info("Free memory = " + Megabytes.toString(Runtime.getRuntime().freeMemory()));
-    LOGGER.info("Total = " + total);
-
+    LOGGER.info("successCount = " + successCount);
 
   }
 

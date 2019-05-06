@@ -38,25 +38,34 @@ import java.util.concurrent.TimeUnit;
 public class StartServlet extends HttpServlet {
 
   @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
     Queue queue = QueueFactory.getDefaultQueue();
 
-    // Fill memcache with lots of data
-    for (int i = 0; i < 100; i++) {
-      queue.add(TaskOptions.Builder.withDefaults()
-          .url("/cache")
-          .method(TaskOptions.Method.GET)
-          .param("key", Integer.toString(i)));
-    }
+    if(request.getParameter("task").equals("cache")) {
 
-    // Now fetch it all to provoke an OOM
+      // Fill memcache with lots of data
 
-    for (int i = 0; i < 10000; i++) {
-      queue.add(TaskOptions.Builder.withDefaults()
-        .url("/fetch")
-        .method(TaskOptions.Method.GET)
-        .countdownMillis(TimeUnit.MINUTES.toMillis(5)));
+      for (int i = 0; i < 1000; i++) {
+        queue.add(TaskOptions.Builder.withDefaults()
+            .url("/cache")
+            .method(TaskOptions.Method.GET)
+            .param("key", Integer.toString(i)));
+      }
+
+    } else {
+
+      // Fetch it all to provoke an OOM
+
+      for (int i = 0; i < 1000; i++) {
+        for(int j=0;j < 3; j++) {
+        queue.add(TaskOptions.Builder.withDefaults()
+            .url("/fetch")
+            .method(TaskOptions.Method.GET)
+            .param("count", Integer.toString(i))
+            .countdownMillis(TimeUnit.MINUTES.toMillis(5)));
+        }
+      }
     }
   }
 }

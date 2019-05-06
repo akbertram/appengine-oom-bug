@@ -31,7 +31,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-// With @WebServlet annotation the webapp/WEB-INF/web.xml is no longer required.
+/**
+ * Fill memcache with data
+ */
 @WebServlet(name = "CacheServlet", value = "/cache")
 public class CacheServlet extends HttpServlet {
 
@@ -44,7 +46,7 @@ public class CacheServlet extends HttpServlet {
     String memcacheKey = request.getParameter("key");
 
     List<MyBean> list = new ArrayList<>();
-    for (int i = 0; i < 100_000; i++) {
+    for (int i = 0; i < 5_000; i++) {
       list.add(new MyBean());
     }
 
