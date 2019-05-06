@@ -16,10 +16,7 @@
 
 package com.example.appengine.java8;
 
-// [START example]
 
-import com.google.appengine.api.memcache.AsyncMemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
@@ -29,9 +26,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 @WebServlet(name = "Start", value = "/start")
@@ -69,4 +63,3 @@ public class StartServlet extends HttpServlet {
     }
   }
 }
-// [END example]

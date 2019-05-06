@@ -16,7 +16,6 @@
 
 package com.example.appengine.java8;
 
-// [START example]
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
 
@@ -57,4 +56,3 @@ public class CacheServlet extends HttpServlet {
   }
 
 }
-// [END example]
