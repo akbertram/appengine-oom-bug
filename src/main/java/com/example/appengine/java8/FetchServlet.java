@@ -16,7 +16,6 @@
 
 package com.example.appengine.java8;
 
-// [START example]
 
 import com.google.appengine.api.memcache.AsyncMemcacheService;
 import com.google.appengine.api.memcache.MemcacheService;
@@ -35,7 +34,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
 /**
- * Fetch large chunks of data from Memcache.
+ * Fetch large chunks of data from Memcache
  */
 @WebServlet(name = "FetchServlet", value = "/fetch")
 public class FetchServlet extends HttpServlet {
@@ -79,4 +78,3 @@ public class FetchServlet extends HttpServlet {
   }
 
 }
-// [END example]
