@@ -30,6 +30,7 @@ limitations under the License.
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <gae.version>1.9.69</gae.version>
     <!-- REQUIRED by appengine-maven-plugin plugin, if web.xml does not exist for your application -->
     <failOnMissingWebXml>false</failOnMissingWebXml>
 <!-- [END_EXCLUDE] -->
@@ -43,7 +44,7 @@ limitations under the License.
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-api-1.0-sdk</artifactId>
-      <version>1.9.69</version>
+      <version>${gae.version}</version>
     </dependency>
     <!-- [START servlet] -->
     <dependency>
@@ -60,19 +61,19 @@ limitations under the License.
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-testing</artifactId>
-      <version>1.9.69</version>
+      <version>${gae.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-api-stubs</artifactId>
-      <version>1.9.69</version>
+      <version>${gae.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-tools-sdk</artifactId>
-      <version>1.9.69</version>
+      <version>${gae.version}</version>
       <scope>test</scope>
     </dependency>
 
