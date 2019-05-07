@@ -18,8 +18,8 @@ package com.example.appengine.java8;
 
 
 import com.google.appengine.api.memcache.AsyncMemcacheService;
-import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.appengine.api.modules.ModulesServiceFactory;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -28,9 +28,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -41,16 +41,29 @@ public class FetchServlet extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(FetchServlet.class.getName());
 
+  private volatile byte[] SINK;
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-    LOGGER.info("Free memory = " + Runtime.getRuntime().freeMemory());
-
-    if(ThreadLocalRandom.current().nextDouble() < 0.5) {
-      LOGGER.info("Easy request, should succeed");
-    }
+    response.setHeader("X-Instance",
+        ModulesServiceFactory.getModulesService().getCurrentInstanceId());
 
     int count = Integer.parseInt(request.getParameter("count"));
+    if(count == 0) {
+      return;
+    }
+
+    try {
+      doGet(count, response);
+    } catch (Error e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void doGet(int count, HttpServletResponse response) {
+
+    LOGGER.info("Free memory = " + Runtime.getRuntime().freeMemory());
 
     AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
 
@@ -63,18 +76,27 @@ public class FetchServlet extends HttpServlet {
 
     // Ensure the results are used
     int successCount = 0;
+    int errorCount = 0;
     for (Future<Object> result : results) {
       try {
         result.get();
         successCount++;
-      } catch (Exception ignored) {
+      } catch (Exception e) {
+        if(errorCount == 0) {
+          LOGGER.log(Level.SEVERE, "Exception fetching from memcache", e);
+        }
+        errorCount++;
       }
     }
 
-
     LOGGER.info("Free memory = " + Megabytes.toString(Runtime.getRuntime().freeMemory()));
     LOGGER.info("successCount = " + successCount);
-
+    if(errorCount > 0) {
+      LOGGER.severe("errorCount = " + errorCount);
+      response.setStatus(500);
+    } else {
+      response.setStatus(200);
+    }
   }
 
 }

@@ -25,4 +25,13 @@ public class MyBean implements Serializable  {
   double getTotal() {
     return x + foo.length() + set.size();
   }
+
+  @Override
+  public String toString() {
+    return "MyBean{" +
+        "x=" + x +
+        ", foo='" + foo + '\'' +
+        ", set=" + set +
+        '}';
+  }
 }
