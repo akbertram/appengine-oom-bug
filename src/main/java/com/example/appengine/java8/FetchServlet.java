@@ -16,10 +16,11 @@
 
 package com.example.appengine.java8;
 
+// [START example]
 
 import com.google.appengine.api.memcache.AsyncMemcacheService;
+import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
-import com.google.appengine.api.modules.ModulesServiceFactory;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -28,8 +29,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
 /**
@@ -40,78 +42,56 @@ public class FetchServlet extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(FetchServlet.class.getName());
 
-  private volatile byte[] byteSink;
-  private volatile long longSink;
-
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-    response.setHeader("X-Instance",
-        ModulesServiceFactory.getModulesService().getCurrentInstanceId());
-
-    int count = Integer.parseInt(request.getParameter("count"));
-    if(count == 0) {
-      return;
-    }
-
-    try {
-      doGet(count, response);
-    } catch (Error e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private void doGet(int count, HttpServletResponse response) {
-
-    // put some pressure on the memory to trigger an OOM
-    byte[] buffer = new byte[1024 * 1024 * 10];
-
-    // don't let the JIT eliminate the allocation
-    buffer[30] = 92;
-    buffer[10299] = 42;
-    byteSink = buffer;
-
-    if(byteSink[30] + byteSink[1029] > 100) {
-      longSink ++;
-    }
-    if(longSink > 20) {
-      byteSink[900] = 62;
-    }
-
-    LOGGER.info("Free memory = " + Runtime.getRuntime().freeMemory());
-
     AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
 
-    List<Future<Object>> results = new ArrayList<>();
+    LOGGER.info("Free memory = " + Megabytes.toString(Runtime.getRuntime().freeMemory()));
 
-    for (int i = 0; i < count; i++) {
-      Future<Object> result = memcacheService.get(Integer.toString(i));
-      results.add(result);
-    }
+    int count = Integer.parseInt(request.getParameter("count"));
 
-    // Ensure the results are used
-    int successCount = 0;
-    long charTotal = 0;
-    int errorCount = 0;
-    for (Future<Object> result : results) {
+    if(ThreadLocalRandom.current().nextDouble() < .25) {
+      LOGGER.info("Easy request, no memcache, should succeed");
+      return;
+
+    } else if(ThreadLocalRandom.current().nextDouble() < 0.50) {
+      LOGGER.info("Simple memcache call");
       try {
-        MyBean mybean = (MyBean) result.get();
-        successCount++;
-
-        // Do some work with mybean so that the JIT does not eliminate our work
-        String[] strings = mybean.getStrings();
-        for (int i = 0; i < strings.length; i++) {
-          charTotal += strings[i].length();
-        }
-
-      } catch (Throwable caught) {
-        throw new RuntimeException(caught);
+        memcacheService.put("dummy", "new dummy value").get();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
       }
+
+    } else {
+
+      // Otherwise big memory-hogging call
+      LOGGER.severe("About to run out of memory....");
+
+      List<Future<Object>> results = new ArrayList<>();
+
+      for (int i = 0; i < 500; i++) {
+        Future<Object> result = memcacheService.get(Integer.toString(i));
+        results.add(result);
+      }
+
+      // Ensure the results are used
+      int successCount = 0;
+      for (Future<Object> result : results) {
+        try {
+          result.get();
+          successCount++;
+        } catch (Throwable caught) {
+          throw new RuntimeException(caught);
+        }
+      }
+      LOGGER.info("successCount = " + successCount);
     }
+
 
     LOGGER.info("Free memory = " + Megabytes.toString(Runtime.getRuntime().freeMemory()));
-    LOGGER.info("successCount = " + successCount);
-    LOGGER.info("Total chars =" + charTotal);
+
   }
 
 }
+// [END example]

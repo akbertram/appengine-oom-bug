@@ -6,20 +6,23 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MyBean implements Serializable  {
-
-  private static final long serialVersionUID = 4L;
-
-  private String[] strings;
+  private Double x;
+  private String foo;
+  private Set<Integer> set;
 
 
   public MyBean() {
-    strings = new String[30_000];
-    for (int i = 0; i < strings.length; i++) {
-      strings[i] = "hello" + ThreadLocalRandom.current().nextDouble();
-    }
+    x = ThreadLocalRandom.current().nextDouble();
+    foo = "Hello hello world " + ThreadLocalRandom.current().nextInt();
+    set = new HashSet<>();
+    set.add(ThreadLocalRandom.current().nextInt());
+    set.add(ThreadLocalRandom.current().nextInt());
+    set.add(ThreadLocalRandom.current().nextInt());
+    set.add(ThreadLocalRandom.current().nextInt());
+    set.add(ThreadLocalRandom.current().nextInt());
   }
 
-  public String[] getStrings() {
-    return strings;
+  double getTotal() {
+    return x + foo.length() + set.size();
   }
 }

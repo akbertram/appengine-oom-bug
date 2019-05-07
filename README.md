@@ -24,10 +24,6 @@ Still not clear what combination of events lead to the affected state.
 
 I have been able to trigger the state a few times using this dummy app.
 
-To attempt:
-
-1. Visit https://activityinfo-gae-oom-bug.appspot.com/start to populate
-   memcache with a set of large key/values pairs
-
-2. Run StressTest.
-
+To attempt, visit https://activityinfo-gae-oom-bug.appspot.com/ and
+click the start button. This will enqueue about 4000 requests to simulate
+traffic load.
