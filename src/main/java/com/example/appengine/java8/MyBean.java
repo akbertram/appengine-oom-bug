@@ -6,32 +6,17 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MyBean implements Serializable  {
-  private Double x;
-  private String foo;
-  private Set<Integer> set;
+  private String[] strings;
 
 
   public MyBean() {
-    x = ThreadLocalRandom.current().nextDouble();
-    foo = "Hello hello world " + ThreadLocalRandom.current().nextInt();
-    set = new HashSet<>();
-    set.add(ThreadLocalRandom.current().nextInt());
-    set.add(ThreadLocalRandom.current().nextInt());
-    set.add(ThreadLocalRandom.current().nextInt());
-    set.add(ThreadLocalRandom.current().nextInt());
-    set.add(ThreadLocalRandom.current().nextInt());
+    strings = new String[30_000];
+    for (int i = 0; i < strings.length; i++) {
+      strings[i] = "hello" + ThreadLocalRandom.current().nextDouble();
+    }
   }
 
-  double getTotal() {
-    return x + foo.length() + set.size();
-  }
-
-  @Override
-  public String toString() {
-    return "MyBean{" +
-        "x=" + x +
-        ", foo='" + foo + '\'' +
-        ", set=" + set +
-        '}';
+  public String[] getStrings() {
+    return strings;
   }
 }

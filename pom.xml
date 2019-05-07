@@ -27,7 +27,7 @@ limitations under the License.
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <gae.version>1.9.69</gae.version>
+    <gae.version>1.9.64</gae.version>
     <failOnMissingWebXml>false</failOnMissingWebXml>
 
   </properties>

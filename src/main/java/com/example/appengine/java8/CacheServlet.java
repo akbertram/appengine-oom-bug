@@ -50,7 +50,7 @@ public class CacheServlet extends HttpServlet {
 
     // Fill memcache with lots of data
 
-    int numKeys = 50;
+    int numKeys = 150;
     for (int i = 0; i < numKeys; i++) {
       queue.add(TaskOptions.Builder.withDefaults()
           .url("/cache")
@@ -69,12 +69,7 @@ public class CacheServlet extends HttpServlet {
 
     String memcacheKey = request.getParameter("key");
 
-    List<MyBean> list = new ArrayList<>();
-    for (int i = 0; i < 5_000; i++) {
-      list.add(new MyBean());
-    }
-
-    MemcacheServiceFactory.getMemcacheService().put(memcacheKey, list);
+    MemcacheServiceFactory.getMemcacheService().put(memcacheKey, new MyBean());
 
     LOGGER.info("Cached. " +  Megabytes.toString(Runtime.getRuntime().freeMemory()));
   }

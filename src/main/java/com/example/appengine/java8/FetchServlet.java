@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,7 +40,8 @@ public class FetchServlet extends HttpServlet {
 
   private static final Logger LOGGER = Logger.getLogger(FetchServlet.class.getName());
 
-  private volatile byte[] SINK;
+  private volatile byte[] byteSink;
+  private volatile long longSink;
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -63,6 +63,21 @@ public class FetchServlet extends HttpServlet {
 
   private void doGet(int count, HttpServletResponse response) {
 
+    // put some pressure on the memory to trigger an OOM
+    byte[] buffer = new byte[1024 * 1024 * 10];
+
+    // don't let the JIT eliminate the allocation
+    buffer[30] = 92;
+    buffer[10299] = 42;
+    byteSink = buffer;
+
+    if(byteSink[30] + byteSink[1029] > 100) {
+      longSink ++;
+    }
+    if(longSink > 20) {
+      byteSink[900] = 62;
+    }
+
     LOGGER.info("Free memory = " + Runtime.getRuntime().freeMemory());
 
     AsyncMemcacheService memcacheService = MemcacheServiceFactory.getAsyncMemcacheService();
@@ -76,27 +91,27 @@ public class FetchServlet extends HttpServlet {
 
     // Ensure the results are used
     int successCount = 0;
+    long charTotal = 0;
     int errorCount = 0;
     for (Future<Object> result : results) {
       try {
-        result.get();
+        MyBean mybean = (MyBean) result.get();
         successCount++;
-      } catch (Exception e) {
-        if(errorCount == 0) {
-          LOGGER.log(Level.SEVERE, "Exception fetching from memcache", e);
+
+        // Do some work with mybean so that the JIT does not eliminate our work
+        String[] strings = mybean.getStrings();
+        for (int i = 0; i < strings.length; i++) {
+          charTotal += strings[i].length();
         }
-        errorCount++;
+
+      } catch (Throwable caught) {
+        throw new RuntimeException(caught);
       }
     }
 
     LOGGER.info("Free memory = " + Megabytes.toString(Runtime.getRuntime().freeMemory()));
     LOGGER.info("successCount = " + successCount);
-    if(errorCount > 0) {
-      LOGGER.severe("errorCount = " + errorCount);
-      response.setStatus(500);
-    } else {
-      response.setStatus(200);
-    }
+    LOGGER.info("Total chars =" + charTotal);
   }
 
 }
