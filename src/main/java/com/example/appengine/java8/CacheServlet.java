@@ -59,7 +59,7 @@ public class CacheServlet extends HttpServlet {
     LOGGER.info("Cached. " +  Megabytes.toString(Runtime.getRuntime().freeMemory()));
 
     // If this is the last one, start fetching.
-    if(memcacheKey.equals("1000")) {
+    if(memcacheKey.equals("999")) {
       startFetching();
     }
   }
