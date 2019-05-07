@@ -6,6 +6,9 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MyBean implements Serializable  {
+
+  private static final long serialVersionUID = 4L;
+
   private String[] strings;
 
 

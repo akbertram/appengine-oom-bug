@@ -19,8 +19,6 @@ public class StressTest {
     startRequests(5);
     startRequests(10);
     startRequests(30);
-    startRequests(40);
-    startRequests(25);
 
   }
 
